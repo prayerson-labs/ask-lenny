@@ -16,7 +16,7 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "dev": "tsx src/index.ts",
-    "start:http": "tsx src/httpServer.ts",
+    "start:http": "node http-server.js",
     "postinstall": "node scripts/download-transcripts.js",
     "download-transcripts": "node scripts/download-transcripts.js"
   },
@@ -37,6 +37,7 @@
   "license": "MIT",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0",
+    "express": "^4.21.2",
     "glob": "^10.3.0",
     "gray-matter": "^4.0.3",
     "lunr": "^2.3.9",
