@@ -174,16 +174,16 @@ export default function Chat() {
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-zinc-50 text-zinc-900">
-      <header className="sticky top-0 z-20 border-b border-zinc-200 bg-white">
-        <div className="mx-auto flex w-full max-w-4xl items-center justify-between px-6 py-4">
+      <header className="sticky top-0 z-20 border-b border-zinc-200 bg-white pt-[env(safe-area-inset-top)]">
+        <div className="mx-auto flex w-full max-w-[860px] items-center justify-between px-4 py-4 sm:px-6">
           <div>
-            <h1 className="text-xl font-semibold">Ask Lenny</h1>
-            <p className="text-sm text-zinc-500">
-              Research assistant for Lenny’s Podcast
+            <h1 className="text-lg font-semibold sm:text-xl">Ask Lenny</h1>
+            <p className="text-xs text-zinc-500 sm:text-sm">
+              Ask the collective mind of Lenny’s Podcast
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <label className="flex items-center gap-2 text-sm text-zinc-600">
+            <label className="flex items-center gap-2 text-xs text-zinc-600 sm:text-sm">
               <input
                 type="checkbox"
                 className="h-4 w-4 rounded border-zinc-300 accent-black"
@@ -196,9 +196,9 @@ export default function Chat() {
         </div>
       </header>
 
-      <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-6 px-6 pb-28 pt-6">
+      <main className="mx-auto flex w-full max-w-[860px] flex-1 flex-col gap-6 px-4 pb-32 pt-6 sm:px-6">
         {messages.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-zinc-300 bg-white p-6 text-sm text-zinc-500">
+          <div className="rounded-2xl border border-dashed border-zinc-300 bg-white p-5 text-sm text-zinc-500 sm:p-6">
             Ask a question about Lenny’s Podcast and get cited answers.
           </div>
         ) : (
@@ -206,7 +206,7 @@ export default function Chat() {
             if (message.role === "user") {
               return (
                 <div key={index} className="flex justify-end">
-                  <div className="max-w-xl rounded-2xl bg-zinc-900 px-4 py-3 text-sm text-white">
+                  <div className="max-w-[85%] rounded-2xl bg-zinc-900 px-4 py-3 text-sm text-white sm:max-w-[75%] sm:text-base">
                     {message.content}
                   </div>
                 </div>
@@ -216,7 +216,7 @@ export default function Chat() {
             if (message.content.kind === "no_results") {
               return (
                 <div key={index} className="flex justify-start">
-                  <div className="max-w-2xl rounded-2xl bg-white px-4 py-3 text-sm text-zinc-700 shadow-sm">
+                  <div className="max-w-[85%] rounded-2xl bg-white px-4 py-3 text-sm text-zinc-700 shadow-sm sm:max-w-[75%] sm:text-base">
                     {message.content.message}
                   </div>
                 </div>
@@ -225,18 +225,18 @@ export default function Chat() {
 
             return (
               <div key={index} className="flex justify-start">
-                <div className="max-w-2xl rounded-2xl bg-white px-4 py-4 text-sm text-zinc-800 shadow-sm">
+                <div className="max-w-[85%] rounded-2xl bg-white px-4 py-4 text-sm text-zinc-800 shadow-sm sm:max-w-[75%] sm:text-base">
                   {message.content.paragraphs.map((paragraph, pIndex) => (
                     <div key={pIndex} className="mb-4 last:mb-0">
-                      <p className="leading-6">{paragraph.text}</p>
-                      <div className="mt-2 flex flex-wrap gap-2 text-xs text-zinc-500">
+                      <p className="leading-6 sm:leading-7">{paragraph.text}</p>
+                      <div className="mt-2 flex flex-wrap gap-2 text-[11px] text-zinc-500 sm:text-xs">
                         {paragraph.citations.map((citation, cIndex) => (
                           <a
                             key={`${pIndex}-${cIndex}`}
                             href={citationLink(citation)}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="rounded-full bg-zinc-100 px-2 py-1 transition hover:bg-zinc-200"
+                            className="break-words rounded-full bg-zinc-100 px-2 py-1 transition hover:bg-zinc-200"
                           >
                             ({citation.guest}, episode:{" "}
                             {citation.episode_title})
@@ -262,7 +262,7 @@ export default function Chat() {
         )}
         {isLoading ? (
           <div className="flex justify-start">
-            <div className="relative overflow-hidden rounded-2xl border border-zinc-100 bg-white px-4 py-3 text-sm text-zinc-600 shadow-sm">
+            <div className="relative overflow-hidden rounded-2xl border border-zinc-100 bg-white px-4 py-3 text-sm text-zinc-600 shadow-sm sm:text-base">
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-zinc-100/70 to-transparent opacity-60 animate-[pulse_3s_ease-in-out_infinite]" />
               <div className="relative flex items-center gap-2">
                 <span className="h-2 w-2 rounded-full bg-zinc-400 animate-[pulse_2.8s_ease-in-out_infinite]" />
@@ -277,9 +277,9 @@ export default function Chat() {
 
       <form
         onSubmit={handleSubmit}
-        className="sticky bottom-0 z-20 border-t border-zinc-200 bg-white"
+        className="sticky bottom-0 z-20 border-t border-zinc-200 bg-white pb-[env(safe-area-inset-bottom)]"
       >
-        <div className="mx-auto flex w-full max-w-4xl flex-col gap-3 px-6 py-4">
+        <div className="mx-auto flex w-full max-w-[860px] flex-col gap-3 px-4 py-4 sm:px-6">
           <div className="flex items-end gap-3">
             <textarea
               ref={inputRef}
@@ -288,7 +288,7 @@ export default function Chat() {
               onKeyDown={handleKeyDown}
               rows={1}
               placeholder="Ask about product, growth, leadership..."
-              className="premium-scrollbar max-h-[180px] w-full flex-1 resize-none rounded-2xl border border-zinc-300 px-5 pb-4 pt-3 pr-8 text-sm text-zinc-900 focus:border-zinc-400 focus:outline-none"
+              className="premium-scrollbar max-h-[180px] w-full flex-1 resize-none rounded-2xl border border-zinc-300 px-4 pb-4 pt-3 pr-8 text-sm text-zinc-900 focus:border-zinc-400 focus:outline-none sm:px-5 sm:text-base"
               style={{ scrollbarGutter: "stable both-edges" }}
             />
             <div className="flex flex-col items-center">
@@ -314,7 +314,7 @@ export default function Chat() {
               </button>
             </div>
           </div>
-          <div className="text-center text-xs text-zinc-500">
+          <div className="flex flex-wrap items-center justify-center gap-1 text-center text-[11px] text-zinc-500 sm:text-xs">
             <span>A product by Prayerson Christian</span>
             <span className="px-1">•</span>
             <a
