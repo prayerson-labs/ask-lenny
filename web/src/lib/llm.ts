@@ -95,15 +95,12 @@ export async function answerQuestion(question: string) {
   });
 
   const toolCall = toolCallResponse.choices[0]?.message.tool_calls?.[0];
-  if (
-    !toolCall ||
-    !("function" in toolCall) ||
-    toolCall.function?.name !== "lennys_quotes_search"
-  ) {
+  const fn = (toolCall as any)?.function;
+  if (!toolCall || !fn || fn.name !== "lennys_quotes_search") {
     throw new Error("Model did not call the required tool.");
   }
 
-  const { query } = parseToolArguments(toolCall.function?.arguments, question);
+  const { query } = parseToolArguments(fn?.arguments, question);
   const quotes = await searchQuotes(query);
 
   if (quotes.length === 0) {
