@@ -1,4 +1,3 @@
-import { randomUUID } from "crypto";
 import { z } from "zod";
 
 const QuoteSchema = z.object({
@@ -38,15 +37,7 @@ export async function searchQuotes(query: string): Promise<QuoteResult[]> {
       "Content-Type": "application/json",
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
-    body: JSON.stringify({
-      jsonrpc: "2.0",
-      id: randomUUID(),
-      method: "tools/call",
-      params: {
-        name: TOOL_NAME,
-        arguments: { query },
-      },
-    }),
+    body: JSON.stringify({ query }),
   });
 
   if (!response.ok) {
