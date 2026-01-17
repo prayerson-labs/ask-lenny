@@ -12,16 +12,9 @@ export type QuoteResult = z.infer<typeof QuoteSchema>;
 
 const TOOL_NAME = "lennys_quotes.search";
 
-const MCPResponseSchema = z
-  .object({
-    result: z
-      .object({
-        results: z.array(QuoteSchema),
-      })
-      .partial(),
-  })
-  .partial()
-  .passthrough();
+const MCPResponseSchema = z.object({
+  results: z.array(QuoteSchema),
+});
 
 export async function searchQuotes(query: string): Promise<QuoteResult[]> {
   const url = process.env.MCP_SERVER_URL;
@@ -46,6 +39,6 @@ export async function searchQuotes(query: string): Promise<QuoteResult[]> {
   }
 
   const data = MCPResponseSchema.parse(await response.json());
-  const results = data.result?.results ?? [];
+  const results = data.results;
   return z.array(QuoteSchema).parse(results);
 }
