@@ -20,7 +20,7 @@ type JsonRpcRequest = {
 };
 
 const TOOL_NAME = "lennys_quotes.search";
-const PORT = Number(process.env.MCP_HTTP_PORT ?? "8989");
+const port = process.env.PORT || 8989;
 const AUTH_TOKEN = process.env.MCP_SERVER_AUTH_TOKEN;
 
 function respond(res: http.ServerResponse, status: number, payload: unknown) {
@@ -123,8 +123,8 @@ async function main() {
     }
   });
 
-  server.listen(PORT, () => {
-    console.error(`HTTP MCP server listening on http://localhost:${PORT}`);
+  server.listen(port, () => {
+    console.error(`HTTP MCP server listening on http://localhost:${port}`);
     console.error(`Tool exposed: ${TOOL_NAME}`);
   });
 }
