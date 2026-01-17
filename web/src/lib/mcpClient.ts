@@ -31,7 +31,7 @@ export async function searchQuotes(query: string): Promise<QuoteResult[]> {
     throw new Error("MCP_SERVER_URL is required.");
   }
 
-  const response = await fetch(url, {
+  const response = await fetch(`${url}/search`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
