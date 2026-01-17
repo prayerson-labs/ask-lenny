@@ -1,26 +1,25 @@
 import express from "express";
-import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
+import path from "path";
+import { loadAllTranscripts } from "./dist/data/loader.js";
+import { buildSearchIndex, searchIndex } from "./dist/data/indexer.js";
+import { searchResultToQuote } from "./dist/utils/quote-extractor.js";
 
 const PORT = process.env.PORT || 8080;
-const TOOL_NAME = "lennys_quotes.search";
-
 const app = express();
 app.use(express.json({ limit: "1mb" }));
 
-const transport = new StdioClientTransport({
-  command: "node",
-  args: ["dist/index.js"],
-  cwd: process.cwd(),
-  stderr: "inherit",
-});
+const dataDir = path.join(process.cwd(), "data", "transcripts");
+let search = null;
 
-const client = new Client({ name: "lennys-quotes-http", version: "1.0.0" });
-
-async function ensureConnected() {
-  if (!client.transport) {
-    await client.connect(transport);
+async function ensureIndexReady() {
+  if (search) return search;
+  const episodes = await loadAllTranscripts(dataDir);
+  if (episodes.length === 0) {
+    throw new Error("No transcripts found. Ensure data/transcripts exists.");
   }
+  const index = buildSearchIndex(episodes);
+  search = index;
+  return search;
 }
 
 app.post("/search", async (req, res) => {
@@ -30,29 +29,25 @@ app.post("/search", async (req, res) => {
   }
 
   try {
-    await ensureConnected();
-    let result;
-    try {
-      result = await client.callTool({
-        name: TOOL_NAME,
-        arguments: { query, guest, limit, min_score },
-      });
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "";
-      if (message.toLowerCase().includes("tool not found")) {
-        result = await client.callTool({
-          name: "search_quotes",
-          arguments: { query, guest, limit, min_score },
-        });
-      } else {
-        throw error;
-      }
-    }
-
-    return res.json({
-      tool: TOOL_NAME,
-      result,
+    const index = await ensureIndexReady();
+    const results = searchIndex(index, query, {
+      guest,
+      limit: typeof limit === "number" ? limit : 5,
+      minScore: typeof min_score === "number" ? min_score : 0.1,
     });
+
+    const quotes = results.map((result) => {
+      const quote = searchResultToQuote(result);
+      return {
+        quote: quote.text,
+        guest: quote.guest,
+        episode_title: quote.episodeTitle,
+        episode_url: quote.youtubeUrl,
+        episode_id: result.episode.folderName,
+      };
+    });
+
+    return res.json({ results: quotes });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unexpected error";
     return res.status(500).json({ error: message });
@@ -65,9 +60,4 @@ app.get("/health", (_req, res) => {
 
 app.listen(PORT, "0.0.0.0", () => {
   console.log("HTTP wrapper listening on port " + PORT);
-});
-
-process.on("SIGTERM", async () => {
-  await client.close();
-  process.exit(0);
 });
