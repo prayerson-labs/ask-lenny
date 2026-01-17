@@ -1,5 +1,6 @@
 [build]
 builder = "nixpacks"
+buildCommand = "cd mcp-lennys-quotes && npm ci && npm run build"
 
 [deploy]
-startCommand = "cd mcp-lennys-quotes && npm ci && npm run build && npm start"
+startCommand = "cd mcp-lennys-quotes && npm start"
