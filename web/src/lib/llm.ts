@@ -66,7 +66,6 @@ export async function answerQuestion(question: string) {
 
     const toolCallResponse = await client.chat.completions.create({
       model: MODEL,
-      temperature: 0.2,
       tool_choice: "required",
       tools: [
         {
@@ -116,7 +115,6 @@ export async function answerQuestion(question: string) {
 
     const answerResponse = await client.chat.completions.create({
       model: MODEL,
-      temperature: 0.2,
       response_format: {
         type: "json_schema",
         json_schema: {
