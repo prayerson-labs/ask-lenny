@@ -2,7 +2,7 @@ import OpenAI from "openai";
 import { z } from "zod";
 import { searchQuotes, QuoteResult } from "./mcpClient";
 
-const MODEL = "gpt-4.1";
+const MODEL = "gpt-5-mini";
 
 const CitationSchema = z.object({
   guest: z.string(),
@@ -56,147 +56,154 @@ function parseToolArguments(raw: string | undefined, fallback: string) {
 }
 
 export async function answerQuestion(question: string) {
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) {
-    throw new Error("OPENAI_API_KEY is required.");
-  }
+  try {
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) {
+      throw new Error("OPENAI_API_KEY is required.");
+    }
 
-  const client = new OpenAI({ apiKey });
+    const client = new OpenAI({ apiKey });
 
-  const toolCallResponse = await client.chat.completions.create({
-    model: MODEL,
-    temperature: 0.2,
-    tool_choice: "required",
-    tools: [
-      {
-        type: "function",
-        function: {
-          name: "lennys_quotes_search",
-          description:
-            "Search Lenny's podcast quotes by query (maps to MCP tool lennys_quotes.search).",
-          parameters: {
-            type: "object",
-            properties: {
-              query: { type: "string" },
+    const toolCallResponse = await client.chat.completions.create({
+      model: MODEL,
+      temperature: 0.2,
+      tool_choice: "required",
+      tools: [
+        {
+          type: "function",
+          function: {
+            name: "lennys_quotes_search",
+            description:
+              "Search Lenny's podcast quotes by query (maps to MCP tool lennys_quotes.search).",
+            parameters: {
+              type: "object",
+              properties: {
+                query: { type: "string" },
+              },
+              required: ["query"],
             },
-            required: ["query"],
           },
         },
-      },
-    ],
-    messages: [
-      {
-        role: "system",
-        content:
-          "You are a research assistant for Lenny's Podcast. You must call the search tool before answering and only use the tool results. The tool name is lennys_quotes_search and it maps to the MCP tool lennys_quotes.search.",
-      },
-      { role: "user", content: question },
-    ],
-  });
+      ],
+      messages: [
+        {
+          role: "system",
+          content:
+            "You are a research assistant for Lenny's Podcast. You must call the search tool before answering and only use the tool results. The tool name is lennys_quotes_search and it maps to the MCP tool lennys_quotes.search.",
+        },
+        { role: "user", content: question },
+      ],
+    });
 
-  const toolCall = toolCallResponse.choices[0]?.message.tool_calls?.[0];
-  const fn = (toolCall as any)?.function;
-  if (!toolCall || !fn || fn.name !== "lennys_quotes_search") {
-    throw new Error("Model did not call the required tool.");
-  }
+    const toolCall = toolCallResponse.choices[0]?.message.tool_calls?.[0];
+    const fn = (toolCall as any)?.function;
+    if (!toolCall || !fn || fn.name !== "lennys_quotes_search") {
+      throw new Error("Model did not call the required tool.");
+    }
 
-  const { query } = parseToolArguments(fn?.arguments, question);
-  const quotes = await searchQuotes(query);
+    const { query } = parseToolArguments(fn?.arguments, question);
+    const quotes = await searchQuotes(query);
 
-  if (quotes.length === 0) {
-    return { kind: "no_results" as const };
-  }
+    if (quotes.length === 0) {
+      return { kind: "no_results" as const };
+    }
 
-  const toolResultMessage = {
-    role: "tool" as const,
-    tool_call_id: toolCall.id,
-    content: JSON.stringify({ results: quotes }),
-  };
+    const toolResultMessage = {
+      role: "tool" as const,
+      tool_call_id: toolCall.id,
+      content: JSON.stringify({ results: quotes }),
+    };
 
-  const answerResponse = await client.chat.completions.create({
-    model: MODEL,
-    temperature: 0.2,
-    response_format: {
-      type: "json_schema",
-      json_schema: {
-        name: "lenny_answer",
-        schema: {
-          type: "object",
-          additionalProperties: false,
-          properties: {
-            paragraphs: {
-              type: "array",
-              minItems: 1,
-              items: {
-                type: "object",
-                additionalProperties: false,
-                properties: {
-                  text: { type: "string" },
-                  citations: {
-                    type: "array",
-                    minItems: 1,
-                    items: {
-                      type: "object",
-                      additionalProperties: false,
-                      properties: {
-                        guest: { type: "string" },
-                        episode_title: { type: "string" },
-                        episode_url: { type: "string" },
-                        episode_id: { type: "string" },
+    const answerResponse = await client.chat.completions.create({
+      model: MODEL,
+      temperature: 0.2,
+      response_format: {
+        type: "json_schema",
+        json_schema: {
+          name: "lenny_answer",
+          schema: {
+            type: "object",
+            additionalProperties: false,
+            properties: {
+              paragraphs: {
+                type: "array",
+                minItems: 1,
+                items: {
+                  type: "object",
+                  additionalProperties: false,
+                  properties: {
+                    text: { type: "string" },
+                    citations: {
+                      type: "array",
+                      minItems: 1,
+                      items: {
+                        type: "object",
+                        additionalProperties: false,
+                        properties: {
+                          guest: { type: "string" },
+                          episode_title: { type: "string" },
+                          episode_url: { type: "string" },
+                          episode_id: { type: "string" },
+                        },
+                        required: ["guest", "episode_title"],
                       },
-                      required: ["guest", "episode_title"],
+                    },
+                    quotes: {
+                      type: "array",
+                      items: {
+                        type: "object",
+                        additionalProperties: false,
+                        properties: {
+                          quote: { type: "string" },
+                          guest: { type: "string" },
+                          episode_title: { type: "string" },
+                          episode_url: { type: "string" },
+                          episode_id: { type: "string" },
+                        },
+                        required: ["quote", "guest", "episode_title"],
+                      },
                     },
                   },
-                  quotes: {
-                    type: "array",
-                    items: {
-                      type: "object",
-                      additionalProperties: false,
-                      properties: {
-                        quote: { type: "string" },
-                        guest: { type: "string" },
-                        episode_title: { type: "string" },
-                        episode_url: { type: "string" },
-                        episode_id: { type: "string" },
-                      },
-                      required: ["quote", "guest", "episode_title"],
-                    },
-                  },
+                  required: ["text", "citations", "quotes"],
                 },
-                required: ["text", "citations", "quotes"],
               },
             },
+            required: ["paragraphs"],
           },
-          required: ["paragraphs"],
         },
       },
-    },
-    messages: [
-      {
-        role: "system",
-        content:
-          "Write a clear, calm, analytical response. Use only the tool results. Every paragraph must include at least one citation.",
-      },
-      { role: "user", content: question },
-      {
-        role: "assistant",
-        tool_calls: [toolCall],
-      },
-      toolResultMessage,
-    ],
-  });
+      messages: [
+        {
+          role: "system",
+          content:
+            "Write a clear, calm, analytical response. Use only the tool results. Every paragraph must include at least one citation.",
+        },
+        { role: "user", content: question },
+        {
+          role: "assistant",
+          tool_calls: [toolCall],
+        },
+        toolResultMessage,
+      ],
+    });
 
-  const content = answerResponse.choices[0]?.message.content;
-  if (!content) {
-    throw new Error("Model returned no content.");
+    const content = answerResponse.choices[0]?.message.content;
+    console.log("openai structured response:", content);
+    if (!content) {
+      throw new Error("Model returned no content.");
+    }
+
+    const parsed = AnswerSchema.parse(JSON.parse(content));
+
+    parsed.paragraphs.forEach((paragraph) => {
+      paragraph.citations.forEach(ensureHasSource);
+      paragraph.quotes.forEach(ensureHasSourceInQuotes);
+    });
+
+    return { kind: "answer" as const, payload: parsed };
+  } catch (error) {
+    console.error("error in answerQuestion pipeline:", error);
+    const message = error instanceof Error ? error.message : "Unexpected error.";
+    throw new Error(`LLM processing failed: ${message}`);
   }
-
-  const parsed = AnswerSchema.parse(JSON.parse(content));
-
-  parsed.paragraphs.forEach((paragraph) => {
-    paragraph.citations.forEach(ensureHasSource);
-    paragraph.quotes.forEach(ensureHasSourceInQuotes);
-  });
-
-  return { kind: "answer" as const, payload: parsed };
 }
