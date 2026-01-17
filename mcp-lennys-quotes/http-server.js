@@ -2,7 +2,7 @@ import express from "express";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 
-const PORT = process.env.PORT || 8989;
+const PORT = process.env.PORT || 8080;
 const TOOL_NAME = "lennys_quotes.search";
 
 const app = express();
@@ -63,7 +63,7 @@ app.get("/health", (_req, res) => {
   res.json({ status: "ok" });
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`HTTP wrapper listening on port ${PORT}`);
 });
 
