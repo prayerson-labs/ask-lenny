@@ -26,3 +26,7 @@ npm run dev
 ```
 
 Open http://localhost:3000 and ask a question.
+
+## Railway start command
+- **Start Command:** `bash start.sh`
+- **Build Command:** leave empty
