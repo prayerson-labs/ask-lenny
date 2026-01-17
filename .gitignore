@@ -3,5 +3,4 @@ node_modules/
 dist/
 .env
 .env.*
-server/openai_key.txt
 mcp-lennys-quotes/data/transcripts/
