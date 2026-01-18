@@ -27,9 +27,6 @@ npm run dev
 
 Open http://localhost:3000 and ask a question.
 
-## Server keep-alive
-Server keep-alive: handled via Vercel cron job pinging the Railway /health endpoint every 5 minutes to prevent cold starts.
-
 ## Railway start command
 - **Builder:** nixpacks
 - **Start Command:** `cd mcp-lennys-quotes && npm ci && npm run build && npm start`
