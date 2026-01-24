@@ -74,16 +74,22 @@ export default function Chat() {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showQuotes, setShowQuotes] = useState(false);
+  const [isMultiline, setIsMultiline] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
   const endRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (!inputRef.current) return;
-    inputRef.current.style.height = "0px";
-    const nextHeight = Math.min(inputRef.current.scrollHeight, 180);
-    inputRef.current.style.height = `${nextHeight}px`;
+    const baseHeight = 48;
+    const maxHeight = 180;
+
+    inputRef.current.style.height = "auto";
+    const nextHeight = Math.min(inputRef.current.scrollHeight, maxHeight);
+    const clampedHeight = Math.max(baseHeight, nextHeight);
+    inputRef.current.style.height = `${clampedHeight}px`;
     inputRef.current.style.overflowY =
-      inputRef.current.scrollHeight > 180 ? "auto" : "hidden";
+      inputRef.current.scrollHeight > maxHeight ? "auto" : "hidden";
+    setIsMultiline(inputRef.current.scrollHeight > baseHeight);
   }, [input]);
 
   useEffect(() => {
@@ -196,7 +202,7 @@ export default function Chat() {
         </div>
       </header>
 
-      <main className="mx-auto flex w-full max-w-[860px] flex-1 flex-col gap-6 px-4 pb-32 pt-6 sm:px-6">
+      <main className="mx-auto flex w-full max-w-[720px] flex-1 flex-col gap-6 px-4 pb-32 pt-6 sm:px-6 md:max-w-[760px] lg:max-w-[800px]">
         {messages.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-zinc-300 bg-white p-5 text-sm text-zinc-500 sm:p-6">
             Ask a question about Lenny’s Podcast and get cited answers.
@@ -279,40 +285,46 @@ export default function Chat() {
         onSubmit={handleSubmit}
         className="sticky bottom-0 z-20 border-t border-zinc-200 bg-white pb-[env(safe-area-inset-bottom)]"
       >
-        <div className="mx-auto flex w-full max-w-[860px] flex-col gap-3 px-4 py-4 sm:px-6">
-          <div className="flex items-end gap-3">
-            <textarea
-              ref={inputRef}
-              value={input}
-              onChange={(event) => setInput(event.target.value)}
-              onKeyDown={handleKeyDown}
-              rows={1}
-              placeholder="Ask about product, growth, leadership..."
-              className="premium-scrollbar max-h-[180px] w-full flex-1 resize-none rounded-2xl border border-zinc-300 px-4 pb-4 pt-3 pr-8 text-sm text-zinc-900 focus:border-zinc-400 focus:outline-none sm:px-5 sm:text-base"
-              style={{ scrollbarGutter: "stable both-edges" }}
-            />
-            <div className="flex flex-col items-center">
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full bg-zinc-900 text-white transition hover:bg-zinc-800 hover:shadow-[0_0_12px_rgba(0,0,0,0.25)] disabled:opacity-60"
-                aria-label="Send message"
-                title="Send"
-              >
-                <svg
-                  viewBox="0 0 24 24"
-                  className="h-5 w-5 translate-y-[-1px]"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="m12 5 0 14" />
-                  <path d="m6 11 6-6 6 6" />
-                </svg>
-              </button>
+        <div className="mx-auto flex w-full max-w-[720px] flex-col gap-3 px-3 py-4 sm:px-6 md:max-w-[760px] lg:max-w-[800px]">
+          <div className="flex items-center gap-2">
+            <div
+              className={`flex w-full flex-1 overflow-hidden border border-zinc-300 bg-white transition-[border-radius] duration-200 ease-in-out focus-within:border-zinc-400 ${
+                isMultiline
+                  ? "rounded-[32px] sm:rounded-[30px]"
+                  : "rounded-full"
+              }`}
+            >
+              <textarea
+                ref={inputRef}
+                value={input}
+                onChange={(event) => setInput(event.target.value)}
+                onKeyDown={handleKeyDown}
+                rows={1}
+                placeholder="Ask about product, growth, leadership..."
+                className="premium-scrollbar box-border h-12 max-h-[180px] min-h-12 w-full resize-none overflow-x-hidden border-0 bg-transparent bg-clip-padding px-4 py-3 pr-14 text-[15px] leading-5 text-zinc-900 focus:outline-none sm:px-5 sm:text-base sm:pr-16"
+                style={{ scrollbarGutter: "stable both-edges" }}
+              />
             </div>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="flex h-12 w-12 cursor-pointer items-center justify-center self-end rounded-full bg-zinc-900 text-white transition hover:bg-zinc-800 hover:shadow-[0_0_12px_rgba(0,0,0,0.25)] disabled:opacity-60"
+              aria-label="Send message"
+              title="Send"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                className="h-5 w-5"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="m12 5 0 14" />
+                <path d="m6 11 6-6 6 6" />
+              </svg>
+            </button>
           </div>
           <div className="flex flex-wrap items-center justify-center gap-1 text-center text-[11px] text-zinc-500 sm:text-xs">
             <span>A product by Prayerson Christian</span>
