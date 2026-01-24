@@ -83,6 +83,13 @@ export default function Chat() {
     const baseHeight = 48;
     const maxHeight = 180;
 
+    if (input.length === 0) {
+      inputRef.current.style.height = `${baseHeight}px`;
+      inputRef.current.style.overflowY = "hidden";
+      setIsMultiline(false);
+      return;
+    }
+
     inputRef.current.style.height = "auto";
     const nextHeight = Math.min(inputRef.current.scrollHeight, maxHeight);
     const clampedHeight = Math.max(baseHeight, nextHeight);
@@ -301,7 +308,7 @@ export default function Chat() {
                 onKeyDown={handleKeyDown}
                 rows={1}
                 placeholder="Ask about product, growth, leadership..."
-                className="premium-scrollbar box-border h-12 max-h-[180px] min-h-12 w-full resize-none overflow-x-hidden border-0 bg-transparent bg-clip-padding px-4 py-3 pr-14 text-[15px] leading-5 text-zinc-900 focus:outline-none sm:px-5 sm:text-base sm:pr-16"
+                className="chat-input premium-scrollbar box-border h-12 max-h-[180px] min-h-12 w-full resize-none overflow-x-hidden border-0 bg-transparent bg-clip-padding px-4 py-3 pr-14 text-[15px] leading-5 text-zinc-900 focus:outline-none sm:px-5 sm:text-base sm:pr-14"
                 style={{ scrollbarGutter: "stable both-edges" }}
               />
             </div>

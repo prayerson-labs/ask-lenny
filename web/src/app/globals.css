@@ -44,3 +44,9 @@ body {
   border: 2px solid transparent;
   background-clip: content-box;
 }
+
+textarea.chat-input::placeholder {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
