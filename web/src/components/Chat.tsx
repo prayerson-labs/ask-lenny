@@ -307,7 +307,7 @@ export default function Chat() {
                 onChange={(event) => setInput(event.target.value)}
                 onKeyDown={handleKeyDown}
                 rows={1}
-                placeholder="Ask about product, growth, leadership..."
+                placeholder="ask about product, growth…"
                 className="chat-input premium-scrollbar box-border h-12 max-h-[180px] min-h-12 w-full resize-none overflow-x-hidden border-0 bg-transparent bg-clip-padding px-4 py-3 pr-14 text-[15px] leading-5 text-zinc-900 focus:outline-none sm:px-5 sm:text-base sm:pr-14"
                 style={{ scrollbarGutter: "stable both-edges" }}
               />
