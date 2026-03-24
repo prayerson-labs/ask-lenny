@@ -377,7 +377,7 @@ export default function Chat() {
                     onKeyDown={handleKeyDown}
                     rows={1}
                     placeholder="Ask about product, growth, strategy…"
-                    className="w-full resize-none border-0 bg-transparent py-[10px] text-[14px] leading-[20px] text-foreground placeholder:text-[#C8BAA8] focus:outline-none sm:py-[14px] sm:text-base sm:leading-[22px]"
+                    className="w-full resize-none border-0 bg-transparent py-[10px] text-[13px] leading-[1.6] text-foreground placeholder:text-[#C8BAA8] focus:outline-none sm:py-[14px] sm:text-[14px] sm:leading-[1.65]"
                   />
                 </div>
                 <div className="w-[14px] shrink-0" />
