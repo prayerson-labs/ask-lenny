@@ -175,10 +175,10 @@ export default function Chat() {
               }}
               className="min-w-0 cursor-pointer text-left"
             >
-              <h1 className="text-[22px] font-bold tracking-tight text-[#1C1510]">
+              <h1 className="font-title text-[19px] font-normal tracking-[-0.2px] text-[#1C1510] sm:text-[20px]">
                 Ask Lenny
               </h1>
-              <p className="mt-[3px] text-[12px] font-light text-[#A89880]">
+              <p className="mt-[2px] text-[11px] font-light tracking-wide text-[#A89880] sm:text-[12px]">
                 Insights from Lenny&#39;s Podcast
               </p>
             </button>
@@ -285,7 +285,7 @@ export default function Chat() {
                 if (message.role === "user") {
                   return (
                     <div key={index} className="flex justify-end">
-                      <div className="max-w-[85%] break-words rounded-t-[20px] rounded-bl-[20px] rounded-br-[6px] bg-accent px-4 py-2.5 text-[14px] leading-[1.6] text-white shadow-[0_1px_2px_rgba(196,98,30,0.15)] sm:max-w-[72%] sm:px-5 sm:py-3 sm:text-[15px] sm:leading-[1.65]">
+                      <div className="max-w-[85%] break-words rounded-t-[20px] rounded-bl-[20px] rounded-br-[6px] bg-accent px-4 py-2.5 text-[13px] leading-[1.6] text-white shadow-[0_1px_2px_rgba(196,98,30,0.15)] sm:max-w-[72%] sm:px-5 sm:py-3 sm:text-[14px] sm:leading-[1.65]">
                         {message.content}
                       </div>
                     </div>
@@ -295,7 +295,7 @@ export default function Chat() {
                 if (message.content.kind === "no_results") {
                   return (
                     <div key={index} className="max-w-[90%] sm:max-w-[82%]">
-                      <p className="text-[14px] leading-[1.65] text-secondary sm:text-[15px] sm:leading-[1.7]">
+                      <p className="text-[13px] leading-[1.65] text-secondary sm:text-[14px] sm:leading-[1.7]">
                         {message.content.message}
                       </p>
                     </div>
@@ -309,7 +309,7 @@ export default function Chat() {
                   >
                     {message.content.paragraphs.map((paragraph, pIndex) => (
                       <div key={pIndex} className="mb-5 last:mb-0 sm:mb-6">
-                        <p className="text-[15px] leading-[1.7] text-foreground sm:text-[16px] sm:leading-[1.75]">
+                        <p className="text-[14px] leading-[1.7] text-foreground sm:text-[15px] sm:leading-[1.75]">
                           {paragraph.text}
                         </p>
                         {paragraph.citations.length > 0 && (

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
+import { Geist, Geist_Mono, Instrument_Serif, DM_Serif_Display } from "next/font/google";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -14,6 +14,12 @@ const geistMono = Geist_Mono({
 
 const instrumentSerif = Instrument_Serif({
   variable: "--font-instrument-serif",
+  subsets: ["latin"],
+  weight: "400",
+});
+
+const dmSerifDisplay = DM_Serif_Display({
+  variable: "--font-dm-serif",
   subsets: ["latin"],
   weight: "400",
 });
@@ -46,7 +52,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${instrumentSerif.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${instrumentSerif.variable} ${dmSerifDisplay.variable} antialiased`}
       >
         {children}
       </body>
