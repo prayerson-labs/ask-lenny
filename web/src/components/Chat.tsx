@@ -163,7 +163,7 @@ export default function Chat() {
     <div className="flex h-dvh flex-col overflow-hidden bg-background text-foreground">
       <header className="shrink-0 bg-background">
         <div className="mx-auto max-w-[760px] px-5 pt-[env(safe-area-inset-top)] sm:px-8">
-          <div className="flex items-center justify-between py-4">
+          <div className="flex items-center justify-between py-3 sm:py-4">
             <button
               type="button"
               onClick={() => {
@@ -227,11 +227,11 @@ export default function Chat() {
       <main className="chat-scroll flex flex-1 flex-col overflow-y-auto">
         <div className="mx-auto flex w-full max-w-[760px] flex-1 flex-col px-5 sm:px-8">
           {messages.length === 0 ? (
-            <div className="flex flex-1 flex-col items-center justify-center px-4 text-center">
-              <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-accent/10">
+            <div className="flex flex-1 flex-col items-center justify-start px-4 pt-6 text-center sm:justify-center sm:pt-0">
+              <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-accent/10 sm:mb-6 sm:h-14 sm:w-14 sm:rounded-2xl">
                 <svg
                   viewBox="0 0 24 24"
-                  className="h-7 w-7 text-accent"
+                  className="h-6 w-6 text-accent sm:h-7 sm:w-7"
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="1.5"
@@ -241,29 +241,29 @@ export default function Chat() {
                   <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
                 </svg>
               </div>
-              <h2 className="font-display text-[24px] tracking-tight sm:text-[30px]">
+              <h2 className="font-display text-[20px] tracking-tight sm:text-[30px]">
                 What would you like to know?
               </h2>
-              <p className="mt-4 max-w-md text-[15px] leading-relaxed text-[#A89880] sm:text-base">
+              <p className="mt-2 max-w-md text-[13px] leading-relaxed text-[#A89880] sm:mt-4 sm:text-base">
                 Search insights from Lenny&#39;s Podcast. Get cited answers
                 from real conversations.
               </p>
 
-              <div className="relative mx-auto mt-8 w-full max-w-[500px] rounded-[14px] border border-[#E0D4C0] bg-white px-5 py-4 text-left shadow-[0_1px_0_#E8DFD0,0_4px_20px_rgba(100,60,20,0.06)]">
-                <span className="absolute top-3 left-4 font-display text-[48px] leading-[0.6] text-[#EAD9C4] select-none">
+              <div className="relative mx-auto mt-5 w-full max-w-[500px] rounded-[12px] border border-[#E0D4C0] bg-white px-4 py-3 text-left shadow-[0_1px_0_#E8DFD0,0_2px_10px_rgba(100,60,20,0.04)] sm:mt-8 sm:rounded-[14px] sm:px-5 sm:py-4 sm:shadow-[0_1px_0_#E8DFD0,0_4px_20px_rgba(100,60,20,0.06)]">
+                <span className="absolute top-2 left-3 font-display text-[36px] leading-[0.6] text-[#EAD9C4] select-none sm:top-3 sm:left-4 sm:text-[48px]">
                   &ldquo;
                 </span>
-                <p className="pl-5 text-[13px] italic leading-[1.7] text-[#4A3728]">
+                <p className="pl-5 text-[12px] italic leading-[1.6] text-[#4A3728] sm:text-[13px] sm:leading-[1.7]">
                   {randomQuote.text}
                 </p>
-                <div className="mt-3 flex items-center gap-1.5 pl-5 text-[11px] text-[#B8A898]">
+                <div className="mt-2 flex items-center gap-1.5 pl-5 text-[10px] text-[#B8A898] sm:mt-3 sm:text-[11px]">
                   <span>{randomQuote.guest}</span>
                   <span className="h-[3px] w-[3px] rounded-full bg-[#C4A882]" />
                   <span>{randomQuote.episode}</span>
                 </div>
               </div>
 
-              <div className="mt-7 flex flex-wrap justify-center gap-2.5">
+              <div className="mt-4 flex flex-wrap justify-center gap-1.5 sm:mt-7 sm:gap-2.5">
                 {SUGGESTIONS.map((text) => (
                   <button
                     key={text}
@@ -272,7 +272,7 @@ export default function Chat() {
                       setInput(text);
                       inputRef.current?.focus();
                     }}
-                    className="cursor-pointer rounded-[20px] border border-[#DDD4C4] bg-white/70 px-[14px] py-[6px] text-[12px] text-[#A89880] transition-colors duration-150 hover:border-[#C4A882] hover:bg-white hover:text-[#C4621E]"
+                    className="cursor-pointer rounded-[20px] border border-[#DDD4C4] bg-white/70 px-[11px] py-[5px] text-[11px] text-[#A89880] transition-colors duration-150 hover:border-[#C4A882] hover:bg-white hover:text-[#C4621E] sm:px-[14px] sm:py-[6px] sm:text-[12px]"
                   >
                     {text}
                   </button>
@@ -280,7 +280,7 @@ export default function Chat() {
               </div>
             </div>
           ) : (
-            <div className="flex flex-col gap-8 py-8">
+            <div className="flex flex-col gap-5 py-5 sm:gap-8 sm:py-8">
               {messages.map((message, index) => {
                 if (message.role === "user") {
                   return (
@@ -366,10 +366,10 @@ export default function Chat() {
         className="shrink-0 border-t border-[#DDD4C4]/50 bg-background pb-[env(safe-area-inset-bottom)]"
       >
         <div className="mx-auto max-w-[760px] px-5 sm:px-8">
-          <div className="flex flex-col gap-2.5 py-4">
+          <div className="flex flex-col gap-1.5 py-2.5 sm:gap-2.5 sm:py-4">
             <div className="rounded-[14px] border border-[#DDD4C4] bg-white transition-[border-color,box-shadow] duration-200 focus-within:border-[#C4A882] focus-within:shadow-[0_0_0_3px_rgba(196,98,30,0.07)]">
               <div className="flex items-start">
-                <div className="chat-input-scroll max-h-[200px] flex-1 overflow-y-auto px-[18px]">
+                <div className="chat-input-scroll max-h-[160px] flex-1 overflow-y-auto px-[14px] sm:max-h-[200px] sm:px-[18px]">
                   <textarea
                     ref={inputRef}
                     value={input}
@@ -377,13 +377,13 @@ export default function Chat() {
                     onKeyDown={handleKeyDown}
                     rows={1}
                     placeholder="Ask about product, growth, strategy…"
-                    className="w-full resize-none border-0 bg-transparent py-[14px] text-[15px] leading-[22px] text-foreground placeholder:text-[#C8BAA8] focus:outline-none sm:text-base"
+                    className="w-full resize-none border-0 bg-transparent py-[10px] text-[14px] leading-[20px] text-foreground placeholder:text-[#C8BAA8] focus:outline-none sm:py-[14px] sm:text-base sm:leading-[22px]"
                   />
                 </div>
                 <div className="w-[14px] shrink-0" />
               </div>
-              <div className="flex items-center justify-between px-[12px] py-[8px]">
-                <div className="flex items-center gap-3">
+              <div className="flex items-center justify-between px-[10px] py-[6px] sm:px-[12px] sm:py-[8px]">
+                <div className="hidden items-center gap-3 sm:flex">
                   <span className="text-[11px] text-[#C8BAA8]">↵ send</span>
                   <span className="text-[11px] text-[#C8BAA8]">⇧↵ new line</span>
                 </div>
