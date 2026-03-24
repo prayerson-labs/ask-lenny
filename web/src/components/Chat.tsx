@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import quotes from "./quotes";
 
 type Citation = {
   guest: string;
@@ -50,6 +51,13 @@ const EPISODE_BASE =
   process.env.NEXT_PUBLIC_EPISODE_BASE_URL ??
   "https://www.lennyspodcast.com/episodes/";
 
+const SUGGESTIONS = [
+  "What makes a great PM?",
+  "How to find product-market fit",
+  "Growth strategies",
+  "Best career advice",
+];
+
 function citationLink(citation: Citation) {
   if (citation.episode_url) {
     return citation.episode_url;
@@ -60,58 +68,28 @@ function citationLink(citation: Citation) {
   return "#";
 }
 
-function formatCitations(citations: Citation[]) {
-  return citations
-    .map(
-      (citation) =>
-        `(${citation.guest}, episode: ${citation.episode_title})`
-    )
-    .join(" ");
-}
-
 export default function Chat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showQuotes, setShowQuotes] = useState(false);
-  const [isMultiline, setIsMultiline] = useState(false);
+  const [randomQuote, setRandomQuote] = useState(quotes[0]);
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
   const endRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
+    setRandomQuote(quotes[Math.floor(Math.random() * quotes.length)]);
+  }, []);
+
+  useEffect(() => {
     if (!inputRef.current) return;
-    const baseHeight = 48;
-    const maxHeight = 180;
-
-    if (input.length === 0) {
-      inputRef.current.style.height = `${baseHeight}px`;
-      inputRef.current.style.overflowY = "hidden";
-      setIsMultiline(false);
-      return;
-    }
-
     inputRef.current.style.height = "auto";
-    const nextHeight = Math.min(inputRef.current.scrollHeight, maxHeight);
-    const clampedHeight = Math.max(baseHeight, nextHeight);
-    inputRef.current.style.height = `${clampedHeight}px`;
-    inputRef.current.style.overflowY =
-      inputRef.current.scrollHeight > maxHeight ? "auto" : "hidden";
-    setIsMultiline(inputRef.current.scrollHeight > baseHeight);
+    inputRef.current.style.height = `${inputRef.current.scrollHeight}px`;
   }, [input]);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [messages, isLoading]);
-
-  const latestAssistant = useMemo(() => {
-    for (let i = messages.length - 1; i >= 0; i -= 1) {
-      const message = messages[i];
-      if (message.role === "assistant") {
-        return message;
-      }
-    }
-    return null;
-  }, [messages]);
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -132,6 +110,19 @@ export default function Chat() {
 
       const data = await response.json();
 
+      if (!response.ok || data.error) {
+        const assistantMessage: AssistantMessage = {
+          role: "assistant",
+          content: {
+            kind: "no_results",
+            message:
+              "Something went wrong. Please try again in a moment.",
+          },
+        };
+        setMessages((prev) => [...prev, assistantMessage]);
+        return;
+      }
+
       if (data.kind === "no_results") {
         const assistantMessage: AssistantMessage = {
           role: "assistant",
@@ -146,13 +137,13 @@ export default function Chat() {
         content: { kind: "answer", paragraphs: data.paragraphs ?? [] },
       };
       setMessages((prev) => [...prev, assistantMessage]);
-    } catch (error) {
+    } catch {
       const assistantMessage: AssistantMessage = {
         role: "assistant",
         content: {
           kind: "no_results",
           message:
-            "no relevant lenny’s podcast quotes found for this topic.",
+            "We're having trouble connecting right now. Please try again.",
         },
       };
       setMessages((prev) => [...prev, assistantMessage]);
@@ -168,191 +159,276 @@ export default function Chat() {
     }
   }
 
-  async function handleCopy() {
-    if (!latestAssistant) return;
-    if (latestAssistant.content.kind === "no_results") {
-      await navigator.clipboard.writeText(latestAssistant.content.message);
-      return;
-    }
-
-    const text = latestAssistant.content.paragraphs
-      .map((paragraph) => {
-        const citations = formatCitations(paragraph.citations);
-        return `${paragraph.text}\n${citations}`;
-      })
-      .join("\n\n");
-
-    await navigator.clipboard.writeText(text);
-  }
-
   return (
-    <div className="flex min-h-screen w-full flex-col bg-zinc-50 text-zinc-900">
-      <header className="sticky top-0 z-20 border-b border-zinc-200 bg-white pt-[env(safe-area-inset-top)]">
-        <div className="mx-auto flex w-full max-w-[860px] items-center justify-between px-4 py-4 sm:px-6">
-          <div>
-            <h1 className="text-lg font-semibold sm:text-xl">Ask Lenny</h1>
-            <p className="text-xs text-zinc-500 sm:text-sm">
-              Ask the collective mind of Lenny’s Podcast
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <label className="flex items-center gap-2 text-xs text-zinc-600 sm:text-sm">
-              <input
-                type="checkbox"
-                className="h-4 w-4 rounded border-zinc-300 accent-black"
-                checked={showQuotes}
-                onChange={(event) => setShowQuotes(event.target.checked)}
-              />
-              Show quotes
-            </label>
-          </div>
-        </div>
-      </header>
-
-      <main className="mx-auto flex w-full max-w-[720px] flex-1 flex-col gap-6 px-4 pb-32 pt-6 sm:px-6 md:max-w-[760px] lg:max-w-[800px]">
-        {messages.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-zinc-300 bg-white p-5 text-sm text-zinc-500 sm:p-6">
-            Ask a question about Lenny’s Podcast and get cited answers.
-          </div>
-        ) : (
-          messages.map((message, index) => {
-            if (message.role === "user") {
-              return (
-                <div key={index} className="flex justify-end">
-                  <div className="max-w-[85%] rounded-2xl bg-zinc-900 px-4 py-3 text-sm text-white sm:max-w-[75%] sm:text-base">
-                    {message.content}
-                  </div>
+    <div className="flex h-dvh flex-col overflow-hidden bg-background text-foreground">
+      <header className="shrink-0 bg-background">
+        <div className="mx-auto max-w-[760px] px-5 pt-[env(safe-area-inset-top)] sm:px-8">
+          <div className="flex items-center justify-between py-4">
+            <button
+              type="button"
+              onClick={() => {
+                setMessages([]);
+                setInput("");
+                setRandomQuote(
+                  quotes[Math.floor(Math.random() * quotes.length)]
+                );
+              }}
+              className="min-w-0 cursor-pointer text-left"
+            >
+              <h1 className="text-[22px] font-bold tracking-tight text-[#1C1510]">
+                Ask Lenny
+              </h1>
+              <p className="mt-[3px] text-[12px] font-light text-[#A89880]">
+                Insights from Lenny&#39;s Podcast
+              </p>
+            </button>
+            <div className="group relative flex shrink-0">
+              <label className="flex cursor-pointer items-center gap-2.5 select-none text-[12px] font-medium text-[#A89880]">
+                <input
+                  type="checkbox"
+                  className="sr-only"
+                  checked={showQuotes}
+                  onChange={(event) => setShowQuotes(event.target.checked)}
+                />
+                <span
+                  className={`relative flex h-[22px] w-10 items-center rounded-full transition-colors duration-200 ${
+                    showQuotes ? "bg-accent" : "bg-border"
+                  }`}
+                >
+                  <span
+                    className={`absolute left-0.5 h-[18px] w-[18px] rounded-full bg-white shadow-sm transition-transform duration-200 ${
+                      showQuotes ? "translate-x-[18px]" : "translate-x-0"
+                    }`}
+                  />
+                </span>
+                Quotes
+              </label>
+              <div
+                role="tooltip"
+                className="pointer-events-none absolute top-full right-0 z-50 mt-2.5 translate-y-1 opacity-0 transition-[opacity,transform] duration-200 ease-out group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100"
+              >
+                <div className="relative whitespace-nowrap rounded-[10px] border border-[#E0D4C0] bg-white px-3.5 py-2.5 text-[11px] leading-[1.5] text-[#4A3728] shadow-[0_2px_12px_rgba(100,60,20,0.08)]">
+                  Show direct quotes from Lenny&#39;s Podcast in responses
+                  <div className="absolute -top-[5px] right-5 h-[9px] w-[9px] rotate-45 border-t border-l border-[#E0D4C0] bg-white" />
                 </div>
-              );
-            }
-
-            if (message.content.kind === "no_results") {
-              return (
-                <div key={index} className="flex justify-start">
-                  <div className="max-w-[85%] rounded-2xl bg-white px-4 py-3 text-sm text-zinc-700 shadow-sm sm:max-w-[75%] sm:text-base">
-                    {message.content.message}
-                  </div>
-                </div>
-              );
-            }
-
-            return (
-              <div key={index} className="flex justify-start">
-                <div className="max-w-[85%] rounded-2xl bg-white px-4 py-4 text-sm text-zinc-800 shadow-sm sm:max-w-[75%] sm:text-base">
-                  {message.content.paragraphs.map((paragraph, pIndex) => (
-                    <div key={pIndex} className="mb-4 last:mb-0">
-                      <p className="leading-6 sm:leading-7">{paragraph.text}</p>
-                      <div className="mt-2 flex flex-wrap gap-2 text-[11px] text-zinc-500 sm:text-xs">
-                        {paragraph.citations.map((citation, cIndex) => (
-                          <a
-                            key={`${pIndex}-${cIndex}`}
-                            href={citationLink(citation)}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="break-words rounded-full bg-zinc-100 px-2 py-1 transition hover:bg-zinc-200"
-                          >
-                            ({citation.guest}, episode:{" "}
-                            {citation.episode_title})
-                          </a>
-                        ))}
-                      </div>
-                      {showQuotes && paragraph.quotes.length > 0 ? (
-                        <div className="mt-3 border-l-2 border-zinc-200 pl-3 text-xs text-zinc-600">
-                          {paragraph.quotes.map((quote, qIndex) => (
-                            <p key={`${pIndex}-${qIndex}`} className="mb-2">
-                              “{quote.quote}” — {quote.guest},{" "}
-                              {quote.episode_title}
-                            </p>
-                          ))}
-                        </div>
-                      ) : null}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            );
-          })
-        )}
-        {isLoading ? (
-          <div className="flex justify-start">
-            <div className="relative overflow-hidden rounded-2xl border border-zinc-100 bg-white px-4 py-3 text-sm text-zinc-600 shadow-sm sm:text-base">
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-zinc-100/70 to-transparent opacity-60 animate-[pulse_3s_ease-in-out_infinite]" />
-              <div className="relative flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-zinc-400 animate-[pulse_2.8s_ease-in-out_infinite]" />
-                <span className="h-2 w-2 rounded-full bg-zinc-400 animate-[pulse_2.8s_ease-in-out_infinite_0.4s]" />
-                <span className="h-2 w-2 rounded-full bg-zinc-400 animate-[pulse_2.8s_ease-in-out_infinite_0.8s]" />
               </div>
             </div>
           </div>
-        ) : null}
-        <div ref={endRef} />
+          <div
+            className="h-px"
+            style={{
+              background:
+                "linear-gradient(90deg, transparent, #D4C8B4 15%, #D4C8B4 85%, transparent)",
+            }}
+          />
+        </div>
+      </header>
+
+      <main className="chat-scroll flex flex-1 flex-col overflow-y-auto">
+        <div className="mx-auto flex w-full max-w-[760px] flex-1 flex-col px-5 sm:px-8">
+          {messages.length === 0 ? (
+            <div className="flex flex-1 flex-col items-center justify-center px-4 text-center">
+              <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-accent/10">
+                <svg
+                  viewBox="0 0 24 24"
+                  className="h-7 w-7 text-accent"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                </svg>
+              </div>
+              <h2 className="font-display text-[24px] tracking-tight sm:text-[30px]">
+                What would you like to know?
+              </h2>
+              <p className="mt-4 max-w-md text-[15px] leading-relaxed text-[#A89880] sm:text-base">
+                Search insights from Lenny&#39;s Podcast. Get cited answers
+                from real conversations.
+              </p>
+
+              <div className="relative mx-auto mt-8 w-full max-w-[500px] rounded-[14px] border border-[#E0D4C0] bg-white px-5 py-4 text-left shadow-[0_1px_0_#E8DFD0,0_4px_20px_rgba(100,60,20,0.06)]">
+                <span className="absolute top-3 left-4 font-display text-[48px] leading-[0.6] text-[#EAD9C4] select-none">
+                  &ldquo;
+                </span>
+                <p className="pl-5 text-[13px] italic leading-[1.7] text-[#4A3728]">
+                  {randomQuote.text}
+                </p>
+                <div className="mt-3 flex items-center gap-1.5 pl-5 text-[11px] text-[#B8A898]">
+                  <span>{randomQuote.guest}</span>
+                  <span className="h-[3px] w-[3px] rounded-full bg-[#C4A882]" />
+                  <span>{randomQuote.episode}</span>
+                </div>
+              </div>
+
+              <div className="mt-7 flex flex-wrap justify-center gap-2.5">
+                {SUGGESTIONS.map((text) => (
+                  <button
+                    key={text}
+                    type="button"
+                    onClick={() => {
+                      setInput(text);
+                      inputRef.current?.focus();
+                    }}
+                    className="cursor-pointer rounded-[20px] border border-[#DDD4C4] bg-white/70 px-[14px] py-[6px] text-[12px] text-[#A89880] transition-colors duration-150 hover:border-[#C4A882] hover:bg-white hover:text-[#C4621E]"
+                  >
+                    {text}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-8 py-8">
+              {messages.map((message, index) => {
+                if (message.role === "user") {
+                  return (
+                    <div key={index} className="flex justify-end">
+                      <div className="max-w-[85%] break-words rounded-t-[20px] rounded-bl-[20px] rounded-br-[6px] bg-accent px-5 py-3 text-[15px] leading-relaxed text-white shadow-[0_1px_3px_rgba(196,98,30,0.25)] sm:max-w-[72%] sm:text-base">
+                        {message.content}
+                      </div>
+                    </div>
+                  );
+                }
+
+                if (message.content.kind === "no_results") {
+                  return (
+                    <div key={index} className="max-w-[90%] sm:max-w-[82%]">
+                      <p className="text-[15px] leading-relaxed text-secondary sm:text-base">
+                        {message.content.message}
+                      </p>
+                    </div>
+                  );
+                }
+
+                return (
+                  <div
+                    key={index}
+                    className="max-w-[90%] break-words sm:max-w-[82%]"
+                  >
+                    {message.content.paragraphs.map((paragraph, pIndex) => (
+                      <div key={pIndex} className="mb-7 last:mb-0">
+                        <p className="text-[16px] leading-[1.75] text-foreground sm:text-[17px] sm:leading-[1.8]">
+                          {paragraph.text}
+                        </p>
+                        {paragraph.citations.length > 0 && (
+                          <div className="mt-3 flex flex-wrap gap-1.5">
+                            {paragraph.citations.map((citation, cIndex) => (
+                              <a
+                                key={`${pIndex}-${cIndex}`}
+                                href={citationLink(citation)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex max-w-full break-words rounded-full bg-accent/[0.07] px-2.5 py-0.5 text-[11px] font-medium text-secondary transition-colors hover:bg-accent/[0.14] hover:text-accent"
+                              >
+                                {citation.guest} &mdash;{" "}
+                                {citation.episode_title}
+                              </a>
+                            ))}
+                          </div>
+                        )}
+                        {showQuotes && paragraph.quotes.length > 0 ? (
+                          <div className="mt-5 border-l-2 border-accent/20 pl-5">
+                            {paragraph.quotes.map((quote, qIndex) => (
+                              <p
+                                key={`${pIndex}-${qIndex}`}
+                                className="mb-3 break-words text-[14px] italic leading-[1.7] text-secondary last:mb-0 sm:text-[15px]"
+                              >
+                                &ldquo;{quote.quote}&rdquo;
+                                <span className="ml-1.5 text-[12px] not-italic text-muted">
+                                  — {quote.guest}
+                                </span>
+                              </p>
+                            ))}
+                          </div>
+                        ) : null}
+                      </div>
+                    ))}
+                  </div>
+                );
+              })}
+              {isLoading ? (
+                <div className="flex items-center gap-1.5">
+                  <span className="h-1.5 w-1.5 rounded-full bg-accent/50 animate-[typing-dot_1s_ease-in-out_infinite]" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-accent/50 animate-[typing-dot_1s_ease-in-out_infinite_0.15s]" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-accent/50 animate-[typing-dot_1s_ease-in-out_infinite_0.3s]" />
+                </div>
+              ) : null}
+              <div ref={endRef} />
+            </div>
+          )}
+        </div>
       </main>
 
       <form
         onSubmit={handleSubmit}
-        className="sticky bottom-0 z-20 border-t border-zinc-200 bg-white pb-[env(safe-area-inset-bottom)]"
+        className="shrink-0 border-t border-[#DDD4C4]/50 bg-background pb-[env(safe-area-inset-bottom)]"
       >
-        <div className="mx-auto flex w-full max-w-[720px] flex-col gap-3 px-3 py-4 sm:px-6 md:max-w-[760px] lg:max-w-[800px]">
-          <div className="flex items-center gap-2">
-            <div
-              className={`flex w-full flex-1 overflow-hidden border border-zinc-300 bg-white transition-[border-radius] duration-200 ease-in-out focus-within:border-zinc-400 ${
-                isMultiline
-                  ? "rounded-[32px] sm:rounded-[30px]"
-                  : "rounded-full"
-              }`}
-            >
-              <textarea
-                ref={inputRef}
-                value={input}
-                onChange={(event) => setInput(event.target.value)}
-                onKeyDown={handleKeyDown}
-                rows={1}
-                placeholder="Ask about product, growth…"
-                className="chat-input premium-scrollbar box-border h-12 max-h-[180px] min-h-12 w-full resize-none overflow-x-hidden border-0 bg-transparent bg-clip-padding px-4 py-3 pr-14 text-[15px] leading-5 text-zinc-900 focus:outline-none sm:px-5 sm:text-base sm:pr-14"
-                style={{ scrollbarGutter: "stable both-edges" }}
-              />
+        <div className="mx-auto max-w-[760px] px-5 sm:px-8">
+          <div className="flex flex-col gap-2.5 py-4">
+            <div className="rounded-[14px] border border-[#DDD4C4] bg-white transition-[border-color,box-shadow] duration-200 focus-within:border-[#C4A882] focus-within:shadow-[0_0_0_3px_rgba(196,98,30,0.07)]">
+              <div className="flex items-start">
+                <div className="chat-input-scroll max-h-[200px] flex-1 overflow-y-auto px-[18px]">
+                  <textarea
+                    ref={inputRef}
+                    value={input}
+                    onChange={(event) => setInput(event.target.value)}
+                    onKeyDown={handleKeyDown}
+                    rows={1}
+                    placeholder="Ask about product, growth, strategy…"
+                    className="w-full resize-none border-0 bg-transparent py-[14px] text-[15px] leading-[22px] text-foreground placeholder:text-[#C8BAA8] focus:outline-none sm:text-base"
+                  />
+                </div>
+                <div className="w-[14px] shrink-0" />
+              </div>
+              <div className="flex items-center justify-between px-[12px] py-[8px]">
+                <div className="flex items-center gap-3">
+                  <span className="text-[11px] text-[#C8BAA8]">↵ send</span>
+                  <span className="text-[11px] text-[#C8BAA8]">⇧↵ new line</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  {input.length > 0 && (
+                    <span className="text-[11px] text-[#C8BAA8]">
+                      {input.length}
+                    </span>
+                  )}
+                  <button
+                    type="submit"
+                    disabled={isLoading}
+                    className="flex h-[32px] w-[32px] shrink-0 cursor-pointer items-center justify-center rounded-[8px] bg-[#C4621E] text-white transition-colors duration-150 hover:bg-[#A8521A] active:scale-95 disabled:opacity-30 disabled:active:scale-100"
+                    aria-label="Send message"
+                    title="Send"
+                  >
+                    <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="m12 5 0 14" />
+                      <path d="m6 11 6-6 6 6" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
             </div>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="flex h-12 w-12 cursor-pointer items-center justify-center self-end rounded-full bg-zinc-900 text-white transition hover:bg-zinc-800 hover:shadow-[0_0_12px_rgba(0,0,0,0.25)] disabled:opacity-60"
-              aria-label="Send message"
-              title="Send"
-            >
-              <svg
-                viewBox="0 0 24 24"
-                className="h-5 w-5"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+            <div className="flex flex-wrap items-center justify-center gap-1 text-center text-[11px] text-[#B8A898]">
+              <span>A product by Prayerson Christian</span>
+              <span className="px-0.5">&middot;</span>
+              <a
+                href="https://x.com/iamprayerson"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[#B8A898] underline-offset-2 transition-colors hover:text-accent hover:underline"
               >
-                <path d="m12 5 0 14" />
-                <path d="m6 11 6-6 6 6" />
-              </svg>
-            </button>
-          </div>
-          <div className="flex flex-wrap items-center justify-center gap-1 text-center text-[11px] text-zinc-500 sm:text-xs">
-            <span>A product by Prayerson Christian</span>
-            <span className="px-1">•</span>
-            <a
-              href="https://x.com/iamprayerson"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="relative text-zinc-500 transition hover:text-black after:absolute after:left-0 after:-bottom-0.5 after:h-px after:w-0 after:bg-black after:transition-all after:duration-300 hover:after:w-full"
-            >
-              X
-            </a>
-            <span className="px-1">•</span>
-            <a
-              href="https://www.linkedin.com/in/prayersonchristian"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="relative text-zinc-500 transition hover:text-black after:absolute after:left-0 after:-bottom-0.5 after:h-px after:w-0 after:bg-black after:transition-all after:duration-300 hover:after:w-full"
-            >
-              LinkedIn
-            </a>
+                X
+              </a>
+              <span className="px-0.5">&middot;</span>
+              <a
+                href="https://www.linkedin.com/in/prayersonchristian"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[#B8A898] underline-offset-2 transition-colors hover:text-accent hover:underline"
+              >
+                LinkedIn
+              </a>
+            </div>
           </div>
         </div>
       </form>
