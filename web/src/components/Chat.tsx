@@ -249,17 +249,17 @@ export default function Chat() {
                 from real conversations.
               </p>
 
-              <div className="relative mx-auto mt-5 w-full max-w-[500px] rounded-[12px] border border-[#E0D4C0] bg-white px-4 py-3 text-left shadow-[0_1px_0_#E8DFD0,0_2px_10px_rgba(100,60,20,0.04)] sm:mt-8 sm:rounded-[14px] sm:px-5 sm:py-4 sm:shadow-[0_1px_0_#E8DFD0,0_4px_20px_rgba(100,60,20,0.06)]">
-                <span className="absolute top-2 left-3 font-display text-[36px] leading-[0.6] text-[#EAD9C4] select-none sm:top-3 sm:left-4 sm:text-[48px]">
+              <div className="relative mx-auto mt-5 w-full max-w-[500px] rounded-[12px] border border-[#EAE3D8] bg-white px-4 py-3 text-left shadow-[0_1px_3px_rgba(100,60,20,0.03)] sm:mt-8 sm:rounded-[14px] sm:border-[#E0D4C0] sm:px-5 sm:py-4 sm:shadow-[0_1px_0_#E8DFD0,0_4px_20px_rgba(100,60,20,0.06)]">
+                <span className="absolute top-2 left-3 font-display text-[32px] leading-[0.6] text-[#F0E8DC] select-none sm:top-3 sm:left-4 sm:text-[48px] sm:text-[#EAD9C4]">
                   &ldquo;
                 </span>
                 <p className="pl-5 text-[12px] italic leading-[1.6] text-[#4A3728] sm:text-[13px] sm:leading-[1.7]">
                   {randomQuote.text}
                 </p>
-                <div className="mt-2 flex items-center gap-1.5 pl-5 text-[10px] text-[#B8A898] sm:mt-3 sm:text-[11px]">
-                  <span>{randomQuote.guest}</span>
-                  <span className="h-[3px] w-[3px] rounded-full bg-[#C4A882]" />
-                  <span>{randomQuote.episode}</span>
+                <div className="mt-2.5 flex flex-col gap-[3px] pl-5 text-[10px] text-[#B8A898] sm:mt-3 sm:flex-row sm:items-center sm:gap-1.5 sm:text-[11px]">
+                  <span className="truncate">{randomQuote.guest}</span>
+                  <span className="hidden h-[3px] w-[3px] shrink-0 rounded-full bg-[#C4A882] sm:block" />
+                  <span className="truncate">{randomQuote.episode}</span>
                 </div>
               </div>
 
@@ -285,7 +285,7 @@ export default function Chat() {
                 if (message.role === "user") {
                   return (
                     <div key={index} className="flex justify-end">
-                      <div className="max-w-[85%] break-words rounded-t-[20px] rounded-bl-[20px] rounded-br-[6px] bg-accent px-5 py-3 text-[15px] leading-relaxed text-white shadow-[0_1px_3px_rgba(196,98,30,0.25)] sm:max-w-[72%] sm:text-base">
+                      <div className="max-w-[85%] break-words rounded-t-[20px] rounded-bl-[20px] rounded-br-[6px] bg-accent px-4 py-2.5 text-[14px] leading-[1.6] text-white shadow-[0_1px_2px_rgba(196,98,30,0.15)] sm:max-w-[72%] sm:px-5 sm:py-3 sm:text-[15px] sm:leading-[1.65]">
                         {message.content}
                       </div>
                     </div>
@@ -295,7 +295,7 @@ export default function Chat() {
                 if (message.content.kind === "no_results") {
                   return (
                     <div key={index} className="max-w-[90%] sm:max-w-[82%]">
-                      <p className="text-[15px] leading-relaxed text-secondary sm:text-base">
+                      <p className="text-[14px] leading-[1.65] text-secondary sm:text-[15px] sm:leading-[1.7]">
                         {message.content.message}
                       </p>
                     </div>
@@ -308,8 +308,8 @@ export default function Chat() {
                     className="max-w-[90%] break-words sm:max-w-[82%]"
                   >
                     {message.content.paragraphs.map((paragraph, pIndex) => (
-                      <div key={pIndex} className="mb-7 last:mb-0">
-                        <p className="text-[16px] leading-[1.75] text-foreground sm:text-[17px] sm:leading-[1.8]">
+                      <div key={pIndex} className="mb-5 last:mb-0 sm:mb-6">
+                        <p className="text-[15px] leading-[1.7] text-foreground sm:text-[16px] sm:leading-[1.75]">
                           {paragraph.text}
                         </p>
                         {paragraph.citations.length > 0 && (
@@ -329,11 +329,11 @@ export default function Chat() {
                           </div>
                         )}
                         {showQuotes && paragraph.quotes.length > 0 ? (
-                          <div className="mt-5 border-l-2 border-accent/20 pl-5">
+                          <div className="mt-4 border-l-2 border-accent/20 pl-4 sm:mt-5 sm:pl-5">
                             {paragraph.quotes.map((quote, qIndex) => (
                               <p
                                 key={`${pIndex}-${qIndex}`}
-                                className="mb-3 break-words text-[14px] italic leading-[1.7] text-secondary last:mb-0 sm:text-[15px]"
+                                className="mb-2.5 break-words text-[13px] italic leading-[1.65] text-secondary last:mb-0 sm:mb-3 sm:text-[14px] sm:leading-[1.7]"
                               >
                                 &ldquo;{quote.quote}&rdquo;
                                 <span className="ml-1.5 text-[12px] not-italic text-muted">
@@ -382,7 +382,7 @@ export default function Chat() {
                 </div>
                 <div className="w-[14px] shrink-0" />
               </div>
-              <div className="flex items-center justify-between px-[10px] py-[6px] sm:px-[12px] sm:py-[8px]">
+              <div className="flex items-center justify-end px-[10px] py-[6px] sm:justify-between sm:px-[12px] sm:py-[8px]">
                 <div className="hidden items-center gap-3 sm:flex">
                   <span className="text-[11px] text-[#C8BAA8]">↵ send</span>
                   <span className="text-[11px] text-[#C8BAA8]">⇧↵ new line</span>
