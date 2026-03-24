@@ -249,7 +249,7 @@ export default function Chat() {
                 from real conversations.
               </p>
 
-              <div className="relative mx-auto mt-5 w-full max-w-[500px] rounded-[12px] border border-[#EAE3D8] bg-white px-4 py-3 text-left shadow-[0_1px_3px_rgba(100,60,20,0.03)] sm:mt-8 sm:rounded-[14px] sm:border-[#E0D4C0] sm:px-5 sm:py-4 sm:shadow-[0_1px_0_#E8DFD0,0_4px_20px_rgba(100,60,20,0.06)]">
+              <div className="relative mx-auto mt-5 w-full max-w-[500px] rounded-[12px] border border-[#EAE3D8] bg-white py-3 pl-4 pr-6 text-left shadow-[0_1px_3px_rgba(100,60,20,0.03)] sm:mt-8 sm:rounded-[14px] sm:border-[#E0D4C0] sm:px-5 sm:py-4 sm:shadow-[0_1px_0_#E8DFD0,0_4px_20px_rgba(100,60,20,0.06)]">
                 <span className="absolute top-2 left-3 font-display text-[32px] leading-[0.6] text-[#F0E8DC] select-none sm:top-3 sm:left-4 sm:text-[48px] sm:text-[#EAD9C4]">
                   &ldquo;
                 </span>
@@ -259,7 +259,7 @@ export default function Chat() {
                 <div className="mt-2.5 flex flex-col gap-[3px] pl-5 text-[10px] text-[#B8A898] sm:mt-3 sm:flex-row sm:items-center sm:gap-1.5 sm:text-[11px]">
                   <span className="truncate">{randomQuote.guest}</span>
                   <span className="hidden h-[3px] w-[3px] shrink-0 rounded-full bg-[#C4A882] sm:block" />
-                  <span className="truncate">{randomQuote.episode}</span>
+                  <span className="sm:truncate">{randomQuote.episode}</span>
                 </div>
               </div>
 
