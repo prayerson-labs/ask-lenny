@@ -1,5 +1,3 @@
-import { readFile } from "fs/promises";
-import path from "path";
 import OpenAI from "openai";
 import { z } from "zod";
 import { searchQuotes, QuoteResult } from "./mcpClient.js";
@@ -206,15 +204,5 @@ export async function answerQuestion(question: string) {
 }
 
 async function resolveApiKey() {
-  const keyFilePath = path.join(process.cwd(), "openai_key.txt");
-  try {
-    const fileKey = (await readFile(keyFilePath, "utf-8")).trim();
-    if (fileKey && fileKey !== "replace_me") {
-      return fileKey;
-    }
-  } catch {
-    // ignore missing file
-  }
-
   return process.env.OPENAI_API_KEY;
 }

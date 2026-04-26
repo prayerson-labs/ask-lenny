@@ -58,6 +58,9 @@ const SUGGESTIONS = [
   "Best career advice",
 ];
 
+const MAINTENANCE_MESSAGE =
+  "Ask Lenny is temporarily offline while we perform maintenance. Please check back soon.";
+
 function citationLink(citation: Citation) {
   if (citation.episode_url) {
     return citation.episode_url;
@@ -115,8 +118,7 @@ export default function Chat() {
           role: "assistant",
           content: {
             kind: "no_results",
-            message:
-              "Something went wrong. Please try again in a moment.",
+            message: MAINTENANCE_MESSAGE,
           },
         };
         setMessages((prev) => [...prev, assistantMessage]);
@@ -142,8 +144,7 @@ export default function Chat() {
         role: "assistant",
         content: {
           kind: "no_results",
-          message:
-            "We're having trouble connecting right now. Please try again.",
+          message: MAINTENANCE_MESSAGE,
         },
       };
       setMessages((prev) => [...prev, assistantMessage]);

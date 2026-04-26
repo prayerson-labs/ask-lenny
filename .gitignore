@@ -3,4 +3,11 @@ node_modules/
 dist/
 .env
 .env.*
+openai_key.txt
+*_key.txt
+*.key
+*.pem
+credentials.json
+*secret*.txt
+*token*.txt
 mcp-lennys-quotes/data/transcripts/
